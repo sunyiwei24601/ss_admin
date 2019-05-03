@@ -66,7 +66,7 @@ class users():
             self.port = js.get('port')
             self.password = js.get('password')
             self.end_date = js.get('password')
-            self.active = js.get('active')
+            self.active = bool(js.get('active'))
             self.limit = js.get('limit')
         else:    
             self.email = email
@@ -108,7 +108,7 @@ class users():
     def to_json(self):
         user_json = {}
         user_json['email'] = self.email
-        user_json['active'] = self.active
+        user_json['active'] = int(self.active)
         user_json['end_date'] = self.end_date
         user_json['port'] = self.port
         user_json['limit'] = self.limit
