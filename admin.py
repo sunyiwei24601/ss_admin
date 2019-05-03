@@ -5,6 +5,8 @@ import time
 import csv
 #本算法中的时间计算系统按照美国西部时区进行计算
 ssadmin_path = "~/documents/.ssmgr/ss-bash/ssadmin.sh"
+MONTH_SECONDS = 31 * 60 * 60 * 24
+TIME_GAP = 8 * 60 * 60
 
 def run_cmd(cmd):
     c = Popen(cmd, shell=True, stdout=subprocess.PIPE, stedrr=subprocess.STDOUT)
@@ -56,8 +58,39 @@ class users():
         self.email = email
         self.port = port 
         self.password = password
-        self.start_date = time.localtime() 
-        
+        self.end_date = time.time() 
+        self.active = False
+        self.limit = "50G"
+            
+    #设置结束时间，如果还未结束就在现有结束时间上增加，如果已经结束，那么就重新设置起始时间为当前
+    def prolong_end_date(self, month):
+        if self.active:
+            self.end_date += int(month) * MONTH_SECONDS
+        else:
+            self.start_date = time.time()
+            self.end_date = self.start_date + int(month) * MONTH_SECONDS
+            self.add_port()
+            self.active = True
+
+    def add_port(self):
+        add_port(self.port, self.password, self.limit)
+
+    def close_port(self):
+        self.active = False
+        del_port(self.port) 
+
+    def check_reset_usage(self):
+        current_time = time.time()
+        if current_time - self.start_date >= MONTH_SECONDS:
+            reset_used(self.port)
+            self.start_date = current_time
+            return 1 #重置成功返回1
+        else:    
+            return 0 #无需重置返回0
+
+    def check_usage(self):
+        pass 
+
 
 
 def read_csv(filepath):
@@ -95,24 +128,24 @@ if __name__ =="__main__":
 
                 user = search_users(users_list, email)
                 if user:
-                    #更新交易信息
-                    pass 
+                    #更新截止日期
+                    user.prolong_end_date(month)
                 else:
                     user = users(email, port, password)                
-                    #更新交易信息
+                    #更新截止信息
+                    user.prolong_end_date(month) 
                     users_list.append(user)
         break
         #交易数据更新结束之后，检查各个用户流量限制，时间限制，是否应该清零流量
         for user in users_list:
-                current_time_stamp = time.time()
-                end_time = user.end_time
-                port = user.port 
-                #到期则删除该port
-                if current_time_stamp > end_time:
-                    del_port(port)
-                    user.active = False
-                else: #未到期则检查是否应该重置端口
-                    user.check_reset_usage()
+            current_time_stamp = time.time()
+            end_date = user.end_date
+            port = user.port 
+            #到期则删除该port
+            if current_time_stamp > end_date:
+                user.close_port()
+            else: #未到期则检查是否应该重置端口
+                user.check_reset_usage()
 
 
 
