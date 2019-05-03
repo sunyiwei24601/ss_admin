@@ -122,7 +122,7 @@ def save_users_list(lists, filepath):
     for user in lists:
         results.append(user.to_json())
     with open(filepath, "w") as f:
-        json.dump(f, results)
+        json.dump(results, f)
     print("Save Users' Records Success!")
     return 1
 
