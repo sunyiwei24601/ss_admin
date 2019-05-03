@@ -138,8 +138,8 @@ def search_users(l, email): #根据邮箱来寻找用户，如果没有则返回
         if user.email == email:
             return user
         else:
-            return None
-
+            continue 
+    return None 
 def main_process(record_nums):
     while(True):
         #这里应该git pull一下
