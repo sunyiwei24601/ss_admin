@@ -126,11 +126,7 @@ def search_users(l, email): #根据邮箱来寻找用户，如果没有则返回
         else:
             return None
 
-
-
-if __name__ =="__main__":
-    record_nums = 0 #记录的总数目，在比对之后考虑是否加入新的交易记录
-    users_list = [] #记录用户类的列表，搜索用户的工作在此进行
+def main_process():
     while(True):
         #这里应该git pull一下
         run_cmd("git pull origin master")
@@ -157,7 +153,7 @@ if __name__ =="__main__":
                     user.prolong_end_date(month) 
                     users_list.append(user)
         ss_start() #修改结束之后要记得重新启动一下
-        ss_restart()
+        #ss_restart()
         break
         #交易数据更新结束之后，检查各个用户流量限制，时间限制，是否应该清零流量
         for user in users_list:
@@ -169,6 +165,18 @@ if __name__ =="__main__":
                 user.close_port()
             else: #未到期则检查是否应该重置端口
                 user.check_reset_usage()
+
+        for i in range(60):
+            time.sleep(1)
+            print("Program suspend, if need check pause Ctrl+C")
+
+    
+
+
+if __name__ =="__main__":
+    record_nums = 1 #记录的总数目，在比对之后考虑是否加入新的交易记录
+    users_list = [] #记录用户类的列表，搜索用户的工作在此进行
+    main_process()
 
 
 
