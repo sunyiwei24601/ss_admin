@@ -54,13 +54,21 @@ class users():
     #time.time()返回当前的时间戳
     #localtime是接受时间戳，返回元组，没有参数就返回当前的时间元组
 
-    def __init__(self, email, port, password):
-        self.email = email
-        self.port = port 
-        self.password = password
-        self.end_date = time.time() 
-        self.active = False
-        self.limit = "50G"
+    def __init__(self, email, port, password, js=None):
+        if js:
+            self.email = js.get('email')
+            self.port = js.get('port')
+            self.password = js.get('password')
+            self.end_date = js.get('password')
+            self.active = js.get('active')
+            self.limit = js.get('limit')
+        else:    
+            self.email = email
+            self.port = port 
+            self.password = password
+            self.end_date = time.time() 
+            self.active = False
+            self.limit = "50G"
             
     #设置结束时间，如果还未结束就在现有结束时间上增加，如果已经结束，那么就重新设置起始时间为当前
     def prolong_end_date(self, month):
@@ -91,6 +99,18 @@ class users():
     def check_usage(self):
         pass 
 
+    def to_json(self):
+        user_json = {}
+        user_json['email'] = self.email
+        user_json['active'] = self.active
+        user_json['end_date'] = self.end_date
+        user_json['port'] = self.port
+        user_json['limit'] = self.limit
+        user_json['start_date'] = self.start_date
+        user_json['password'] = self.password
+        return user_json 
+    
+    
 
 
 def read_csv(filepath):
@@ -113,6 +133,7 @@ if __name__ =="__main__":
     users_list = [] #记录用户类的列表，搜索用户的工作在此进行
     while(True):
         #这里应该git pull一下
+        run_cmd("git pull origin master")
         records = read_csv("Records.csv")
         if len(records) > record_nums:
             new_records = records[record_nums:]
@@ -135,6 +156,8 @@ if __name__ =="__main__":
                     #更新截止信息
                     user.prolong_end_date(month) 
                     users_list.append(user)
+        ss_start() #修改结束之后要记得重新启动一下
+        ss_restart()
         break
         #交易数据更新结束之后，检查各个用户流量限制，时间限制，是否应该清零流量
         for user in users_list:
