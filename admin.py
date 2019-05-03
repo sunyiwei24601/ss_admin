@@ -5,52 +5,11 @@ import time
 import os 
 import sys
 import csv
+from ss_cmd import *
 #本算法中的时间计算系统按照美国西部时区进行计算
 ssadmin_path = "~/documents/.ssmgr/ss-bash/ssadmin.sh"
 MONTH_SECONDS = 31 * 60 * 60 * 24
 TIME_GAP = 8 * 60 * 60
-
-def run_cmd(cmd):
-    c = Popen(cmd, shell=True, stdout=subprocess.PIPE)
-    results = c.stdout.readlines()
-    return results 
-
-def add_port(port, password, limit):
-    cmd_head = ssadmin_path +" add " + str(port) + " " + password + " " + limit
-    results = run_cmd(cmd_head)
-    return results 
-
-def del_port(port):
-    cmd_head = ssadmin_path + " del " + str(port) 
-    results = run_cmd(cmd_head)
-    return results
-
-#重置用量
-def reset_used(port):
-    cmd_head = ssadmin_path + " rused " + str(port) 
-    results = run_cmd(cmd_head)
-    return results
-
-#显示各端口总用量，可以指定某一端口
-def show_port(port=None):
-    cmd_head = ssadmin_path +" show" 
-    if port:
-        cmd_head += (" " +str(port))
-    results = run_cmd(cmd_head)
-    return results[1:]
-
-def ss_start():
-    cmd_head = ssadmin_path + " start"
-    return run_cmd(cmd_head)
-
-def ss_restart():
-    cmd_head = ssadmin_path + " restart"
-    return run_cmd(cmd_head)
-
-def ss_stop():
-    cmd_head = ssadmin_path + " stop"
-    return run_cmd(cmd_head)
-
 class users():
     #strptime是把字符串转化为struct
     #strftime是把strcut转化为字符串
@@ -61,6 +20,7 @@ class users():
     #localtime是接受时间戳，返回元组，没有参数就返回当前的时间元组
 
     def __init__(self, email, port, password, js=None):
+        #如果有json文件读取,就从json导入,如果没有就根据给出的属性创建
         if js:
             self.email = js.get('email')
             self.port = js.get('port')
@@ -93,7 +53,7 @@ class users():
         self.active = False
         del_port(self.port) 
 
-    def check_reset_usage(self):
+    def check_reset_usage(self):#检测距离开始的时间过了一个月就重置流量
         current_time = time.time()
         if current_time - self.start_date >= MONTH_SECONDS:
             reset_used(self.port)
@@ -126,7 +86,6 @@ def save_users_list(lists, filepath):
     print("Save Users' Records Success!")
     return 1
 
-
 def read_csv(filepath):
     f = csv.reader(open(filepath))
     records = [i for i in f]
@@ -140,6 +99,10 @@ def search_users(l, email): #根据邮箱来寻找用户，如果没有则返回
         else:
             continue 
     return None 
+
+
+#主进程的作用是 每分钟git一次最新的csv,如果有新的交易,就添加进去,将用户列表保存,重启应用
+#然后审核一下是否过期,将用户列表保存
 def main_process(record_nums):
     while(True):
         #这里应该git pull一下
@@ -176,7 +139,7 @@ def main_process(record_nums):
 
         ss_start() #修改结束之后要记得重新启动一下
         #ss_restart()
-        # break
+        
         #交易数据更新结束之后，检查各个用户流量限制，时间限制，是否应该清零流量
         for user in users_list:
             current_time_stamp = time.time()
@@ -197,16 +160,12 @@ def main_process(record_nums):
             except:
                 print("Keyboard Pause, please continue typing")
                 return 0
-        
-                
-
-    
 
 
 if __name__ =="__main__":
     record_nums = 0 #记录的总数目，在比对之后考虑是否加入新的交易记录
     record_path = "record_nums.json"
-    if os.path.exists(record_path):
+    if os.path.exists(record_path): # 读取已有的交易数量记录
         with open(record_path) as f:
             record_nums = json.load(f)
 
@@ -218,7 +177,6 @@ if __name__ =="__main__":
             for user_json in users_json_list:
                 users_list.append(users(0, 0, 0, js=user_json))
         
-
     main_process(record_nums)
 
 
