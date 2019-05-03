@@ -140,7 +140,7 @@ def search_users(l, email): #根据邮箱来寻找用户，如果没有则返回
         else:
             return None
 
-def main_process():
+def main_process(record_nums):
     while(True):
         #这里应该git pull一下
         run_cmd("git pull origin master")
@@ -217,7 +217,7 @@ if __name__ =="__main__":
                 users_list.append(users(0, 0, 0, js=user_json))
         
 
-    main_process()
+    main_process(record_nums)
 
 
 
