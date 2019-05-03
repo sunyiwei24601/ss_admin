@@ -154,7 +154,7 @@ def main_process():
                     users_list.append(user)
         ss_start() #修改结束之后要记得重新启动一下
         #ss_restart()
-        break
+        # break
         #交易数据更新结束之后，检查各个用户流量限制，时间限制，是否应该清零流量
         for user in users_list:
             current_time_stamp = time.time()
