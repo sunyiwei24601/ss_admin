@@ -206,7 +206,7 @@ if __name__ =="__main__":
     record_path = "record_nums.json"
     if os.path.exists(record_path):
         with open(record_path) as f:
-            record_nums = json.load(f)[-1]
+            record_nums = json.load(f)
 
     users_path = "users_record.json"
     users_list = [] #记录用户类的列表，搜索用户的工作在此进行,如果已有users记录则进行读取
