@@ -65,7 +65,7 @@ class users():
             self.email = js.get('email')
             self.port = js.get('port')
             self.password = js.get('password')
-            self.end_date = js.get('password')
+            self.end_date = js.get('end_date')
             self.active = bool(js.get('active'))
             self.limit = js.get('limit')
         else:    
