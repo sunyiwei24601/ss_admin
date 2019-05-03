@@ -9,7 +9,7 @@ MONTH_SECONDS = 31 * 60 * 60 * 24
 TIME_GAP = 8 * 60 * 60
 
 def run_cmd(cmd):
-    c = Popen(cmd, shell=True, stdout=subprocess.PIPE, stedrr=subprocess.STDOUT)
+    c = Popen(cmd, shell=True, stdout=subprocess.PIPE)
     results = c.stdout.readlines()
     return results 
 
