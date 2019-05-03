@@ -147,6 +147,8 @@ def main_process(record_nums):
         records = read_csv("Records.csv")
         if len(records) > record_nums:
             new_records = records[record_nums:]
+        else:
+            new_records = []
         
         #检查出有新的交易记录，首先审核用户是否存在，存在则更新，不存在则新建用户
         if new_records:
