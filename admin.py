@@ -120,7 +120,7 @@ class users():
 def save_users_list(lists, filepath):
     results = []
     for user in lists:
-        results.append(user.tojson())
+        results.append(user.to_json())
     with open(filepath, "w") as f:
         json.dump(f, results)
     print("Save Users' Records Success!")
