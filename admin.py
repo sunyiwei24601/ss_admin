@@ -2,6 +2,8 @@ import json
 import subprocess
 from subprocess import Popen
 import time 
+import os 
+import sys
 import csv
 #本算法中的时间计算系统按照美国西部时区进行计算
 ssadmin_path = "~/documents/.ssmgr/ss-bash/ssadmin.sh"
@@ -43,6 +45,10 @@ def ss_start():
 
 def ss_restart():
     cmd_head = ssadmin_path + " restart"
+    return run_cmd(cmd_head)
+
+def ss_stop():
+    cmd_head = ssadmin_path + " stop"
     return run_cmd(cmd_head)
 
 class users():
@@ -110,7 +116,15 @@ class users():
         user_json['password'] = self.password
         return user_json 
     
-    
+#存储users列表,运用类的tojson函数,并输出成功保存
+def save_users_list(lists, filepath):
+    results = []
+    for user in lists:
+        results.append(user.tojson())
+    with open(filepath, "w") as f:
+        json.dump(f, results)
+    print("Save Users' Records Success!")
+    return 1
 
 
 def read_csv(filepath):
@@ -152,6 +166,12 @@ def main_process():
                     #更新截止信息
                     user.prolong_end_date(month) 
                     users_list.append(user)
+                record_nums += 1
+            with open(record_path, "w") as f:
+                json.dump(record_nums, f) 
+            
+            save_users_list(users_list, users_path)
+
         ss_start() #修改结束之后要记得重新启动一下
         #ss_restart()
         # break
@@ -165,10 +185,12 @@ def main_process():
                 user.close_port()
             else: #未到期则检查是否应该重置端口
                 user.check_reset_usage()
+        
+        save_users_list(users_list, users_path)
 
-        for i in range(60):
+        for i in range(6):
             try:
-                time.sleep(1)
+                time.sleep(10)
                 print("Program suspend, if need check pause Ctrl+C")
             except:
                 print("Keyboard Pause, please continue typing")
@@ -181,7 +203,20 @@ def main_process():
 
 if __name__ =="__main__":
     record_nums = 0 #记录的总数目，在比对之后考虑是否加入新的交易记录
-    users_list = [] #记录用户类的列表，搜索用户的工作在此进行
+    record_path = "record_nums.json"
+    if os.path.exists(record_path):
+        with open(record_path) as f:
+            record_nums = json.load(f)[-1]
+
+    users_path = "users_record.json"
+    users_list = [] #记录用户类的列表，搜索用户的工作在此进行,如果已有users记录则进行读取
+    if os.path.exists(users_path):
+        with open(users_path) as f:
+            users_json_list = json.load(f)
+            for user_json in users_json_list:
+                users_list.append(users(0, 0, 0, js=user_json))
+        
+
     main_process()
 
 
