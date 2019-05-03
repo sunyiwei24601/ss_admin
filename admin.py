@@ -167,14 +167,20 @@ def main_process():
                 user.check_reset_usage()
 
         for i in range(60):
-            time.sleep(1)
-            print("Program suspend, if need check pause Ctrl+C")
+            try:
+                time.sleep(1)
+                print("Program suspend, if need check pause Ctrl+C")
+            except:
+                print("Keyboard Pause, please continue typing")
+                return 0
+        
+                
 
     
 
 
 if __name__ =="__main__":
-    record_nums = 1 #记录的总数目，在比对之后考虑是否加入新的交易记录
+    record_nums = 0 #记录的总数目，在比对之后考虑是否加入新的交易记录
     users_list = [] #记录用户类的列表，搜索用户的工作在此进行
     main_process()
 
